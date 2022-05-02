@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  pyserver:
+    build: pyserver_build
+    restart: 'on-failure'
+
+  pyclient:
+    build: pyclient_build
+    restart: 'no'
+    ports:
+      - 15250:15250

@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+import os
+
+f = open('docker_cleaner.log', 'w')
+f.write('Beginning state: \n')
+
+res = []
+
+def log(data):
+	f.write(data)
+
+def docker_img_check(repo, tag, img_id):
+	if repo == '<none>' and tag == '<none>':
+		res.append(os.popen(f'docker rmi {img_id}').read())
+		return 1
+	return 0
+
+images = os.popen('docker images').read()
+counter = 0
+log(images)
+
+for image in images.split('\n')[1::]:
+	if len(image) > 1:
+		data = list(filter(('').__ne__, image.split(' ')))
+		if len(data) > 0:
+			counter += docker_img_check(data[0], data[1], data[2])
+			
+
+if counter:
+	print(f'successfully cleaned {counter}')
+	log('\n')
+	for i in res:
+		log(i)
+else:
+	print('nothing to clean')
+
+images = os.popen('docker images').read()
+log('\nFinal state: \n')
+log(images)
+
+f.close()
