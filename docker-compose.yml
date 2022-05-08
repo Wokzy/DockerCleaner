@@ -1,12 +1,14 @@
-version: '3.7'
+version: '3'
 
 services:
   pyserver:
     build: pyserver_build
-    restart: 'on-failure'
+    network_mode: host
+    ports:
+      - 1234:1234
 
   pyclient:
     build: pyclient_build
-    restart: 'no'
-    ports:
-      - 15250:15250
+    network_mode: 'host'
+    depends_on:
+      - pyserver

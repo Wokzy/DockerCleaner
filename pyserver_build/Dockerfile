@@ -6,3 +6,4 @@ ADD ./server.py bin
 ADD ./client.py bin
 
 ENTRYPOINT ["python3", "/bin/server.py"]
+#ENTRYPOINT ["ls"]
