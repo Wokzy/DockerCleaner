@@ -6,7 +6,7 @@ sock.connect(('localhost', 1234))
 
 c = datetime.now()
 
-while (datetime.now() - c).total_seconds() < 61:
+while (datetime.now() - c).total_seconds() < 26:
 	time_passed = int((datetime.now() - c).total_seconds())
 	if time_passed % 5 == 0:
 		sock.send(bytes(f'time passed: {time_passed}\n'.encode('ascii')))

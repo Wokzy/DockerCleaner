@@ -1,23 +1,49 @@
 #!/usr/bin/env python3
-import socket
+import socket, select
 
 sock = socket.socket()
 sock.bind(('localhost', 1234))
+sock.listen(5)
+inputs = [sock]
+outputs = []
+
+messages = {}
+
 print('binded')
-sock.listen(1024)
 
-while True:
-	conn, addr = sock.accept()
 
-	#test comment
-	print('connected:', addr)
+while inputs:
+	readable, writable, exceptional = select.select(inputs, outputs, inputs)
 
-	while True:
-	    data = conn.recv(1024)
-	    if not data:
-	        break
-	    conn.send(data.upper())
+	for s in readable:
+		if s == sock:
+			conn, addr = s.accept()
+			conn.setblocking(0)
+			inputs.append(conn)
+		else:
+			data = s.recv(1024)
+			
+			if data:
+				messages[s] = data.upper()
+				if s not in outputs:
+					outputs.append(s)
+			else:
+				if s in outputs:
+					outputs.remove(s)
+				inputs.remove(s)
+				s.shutdown(socket.SHUT_RDWR)
+				s.close()
+				del messages[s]
 
-	conn.close()
+	for s in writable:
+		print(s)
+		outputs.remove(s)
+		s.send(messages[s])
 
-#p10273.3 12312313 8 12
+	for s in exceptional:
+		if s in outputs:
+			outputs.remove(s)
+		inputs.remove(s)
+		s.shutdown(socket.SHUT_RDWR)
+		s.close()
+		del messages[s]
