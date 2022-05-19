@@ -24,6 +24,7 @@ while inputs:
 			data = s.recv(1024)
 			
 			if data:
+				print(f'Recieved {data.decode("ascii")} | from {s.getpeername()[0]}:{s.getpeername()[1]}\n')
 				messages[s] = data.upper()
 				if s not in outputs:
 					outputs.append(s)
@@ -36,9 +37,9 @@ while inputs:
 				del messages[s]
 
 	for s in writable:
-		print(s)
 		outputs.remove(s)
 		s.send(messages[s])
+		print(f'Sent {messages[s].decode("ascii")} | to {s.getpeername()[0]}:{s.getpeername()[1]}\n')
 
 	for s in exceptional:
 		if s in outputs:
