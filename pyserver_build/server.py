@@ -11,7 +11,6 @@ messages = {}
 
 print('binded')
 
-
 while inputs:
 	readable, writable, exceptional = select.select(inputs, outputs, inputs)
 

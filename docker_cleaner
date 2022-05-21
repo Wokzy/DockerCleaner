@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os
+import subprocess as sb
 
 f = open('docker_cleaner.log', 'w')
 f.write('Beginning state: \n')
@@ -9,13 +9,41 @@ res = []
 def log(data):
 	f.write(data)
 
+def subprocess_run(command):
+	rs = sb.Popen(command, shell=True, stdout=sb.PIPE, stderr=sb.PIPE).communicate()
+	if rs[1].decode('utf-8'):
+		return rs[1].decode('utf-8')
+	return rs[0].decode('utf-8')
+
+def check_container_status(containter_id): # If container is UP
+	rs = subprocess_run('docker ps').split('\n')[1::]
+	for containter in rs:
+		print(containter.split(' ')[0])
+		if containter != '' and containter.split(' ')[0] == containter_id:
+			return True
+	return False
+
+def remove_data(img_id):
+	rs = subprocess_run(f'docker rmi {img_id}')
+	if 'Deleted' not in rs:
+		containter = rs.split(' ')[-1][:-1:]
+		print(f'Image {img_id} is connected with {containter}.', end=' ')
+		if check_container_status(containter):
+			print(f'{containter} is working, image wont be deleted.')
+		else:
+			print(f'Deleting {containter} due to inactivity.')
+			res.append('Deleted connected containter: ' + subprocess_run(f'docker rm {containter}'))
+			remove_data(img_id)
+	else:
+		res.append(rs)
+
 def docker_img_check(repo, tag, img_id):
 	if repo == '<none>' and tag == '<none>':
-		res.append(os.popen(f'docker rmi {img_id}').read())
+		remove_data(img_id)
 		return 1
 	return 0
 
-images = os.popen('docker images').read()
+images = subprocess_run('docker images')
 counter = 0
 log(images)
 
@@ -34,7 +62,7 @@ if counter:
 else:
 	print('nothing to clean')
 
-images = os.popen('docker images').read()
+images = subprocess_run('docker images')
 log('\nFinal state: \n')
 log(images)
 
