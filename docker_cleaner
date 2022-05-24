@@ -43,6 +43,19 @@ def docker_img_check(repo, tag, img_id):
 		return 1
 	return 0
 
+def volumes_cleaning():
+	cntr = 0
+	volumes = subprocess_run('docker volume ls -f dangling=true').split('\n')[1::]
+	for volume_line in volumes:
+		if volume_line:
+			vol = volume_line.split(' ')[-1]
+			rs = subprocess_run(f'docker volume rm {vol}')
+			res.append(f'Removed volume: {vol}')
+
+			cntr += 1
+
+	return cntr
+
 images = subprocess_run('docker images')
 counter = 0
 log(images)
@@ -52,15 +65,20 @@ for image in images.split('\n')[1::]:
 		data = list(filter(('').__ne__, image.split(' ')))
 		if len(data) > 0:
 			counter += docker_img_check(data[0], data[1], data[2])
-			
+
 
 if counter:
-	print(f'successfully cleaned {counter}')
+	print(f'successfully cleaned {counter} images')
 	log('\n')
-	for i in res:
-		log(i)
 else:
-	print('nothing to clean')
+	print('no images to clean')
+
+vol_res = volumes_cleaning()
+if vol_res:
+	print(f'cleaned {vol_res} volume(s)')
+
+for i in res:
+	log(i)
 
 images = subprocess_run('docker images')
 log('\nFinal state: \n')

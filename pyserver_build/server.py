@@ -7,7 +7,7 @@ sock.listen(5)
 inputs = [sock]
 outputs = []
 
-messages = {}
+messages = {}#1234
 
 print('binded')
 

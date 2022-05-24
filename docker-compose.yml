@@ -4,6 +4,8 @@ services:
   pyserver:
     build: pyserver_build
     network_mode: host
+    volumes:
+      - hello:/app
     ports:
       - 1234:1234
 
@@ -12,9 +14,17 @@ services:
     network_mode: 'host'
     depends_on:
       - pyserver
+    volumes:
+      - client:/client
 
   pyclient2:
     build: pyclient_build
     network_mode: 'host'
     depends_on:
       - pyserver
+
+volumes:
+  hello:
+    external: false
+  client:
+    external: false
